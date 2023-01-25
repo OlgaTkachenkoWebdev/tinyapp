@@ -39,9 +39,14 @@ app.get("/urls/new", (req, res) => {
 app.post("/urls", (req, res) => {
   let longURL = req.body.longURL;
   let id = generateRandomString(6);
-  console.log(id);
   urlDatabase[id] = longURL;
   res.redirect(`/urls/${id}`);
+});
+app.post("/urls/:id/delete", (req, res) => {
+  const id = req.params.id;
+  console.log(req.params.id)
+  delete urlDatabase[id];
+  res.redirect("/urls");
 });
 app.get("/urls/:id", (req, res) => {
   const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
