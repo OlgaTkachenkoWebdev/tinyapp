@@ -58,12 +58,13 @@ app.get("/urls", (req, res) => {
   const templateVars = { 
     urls: urlDatabase,
     user: users[req.cookies["user_id"]] };
-    console.log(templateVars['user'])
+    console.log(templateVars.user)
+    console.log(req.cookies["user_id"])
   res.render("urls_index", templateVars);
 });
 app.get("/urls/new", (req, res) => {
   let user = { users:users[req.cookies["user_id"]]};
-  res.render("urls_new", users);
+  res.render("urls_new", user);
 });
 app.post("/urls", (req, res) => {
   let longURL = req.body.longURL;
@@ -94,30 +95,42 @@ app.get("/u/:id", (req, res) => {
   res.redirect(longURL);
 });
 app.post("/login", (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  const user = userFinder(email);
+  const id = user.id;
+  if (!user) {
+    return res.status(403).send("Email is not found")
+  } else if (user["password"] !== password) {
+      return res.status(403).send("Incorrect password")
+  }
   res
   .cookie('user_id', id)
   .redirect("/urls");
 });
 app.get("/login", (req, res) => {
-  res.render("login")
+  let user = users[req.cookies["user_id"]]
+  res.render("login", {user})
 });
 app.post("/logout", (req, res) => {
   res
   .clearCookie('user_id')
-  .redirect("/urls");
+  .redirect("/login");
 });
 app.get("/register", (req, res) => {
-  res.render("register");
+  let user = users[req.cookies["user_id"]]
+  res.render("register", {user});
 });
 app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   const id = generateRandomString(5);
+  const user = userFinder(email);
 
   if (!email || !password) {
-    return res.status(400).send("Please provide a username and a password")
+    return res.status(400).send("Please provide a email and a password")
   }
-  if (userFinder(email)) {
+  if (user) {
     return res.status(400).send("This email is already registered")
   }
 
