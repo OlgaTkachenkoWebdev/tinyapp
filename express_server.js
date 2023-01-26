@@ -34,6 +34,17 @@ function generateRandomString(length) {
   return shortURL;
 }
 
+function userFinder(newEmail) {
+  let foundUser = null;
+  for(let userId in users) {
+    const user = users[userId];
+    if (user['email'] === newEmail) {
+      foundUser = user;
+    }
+  }
+  return foundUser;
+}
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -88,7 +99,7 @@ app.post("/login", (req, res) => {
 });
 app.post("/logout", (req, res) => {
   res
-  .clearCookie('email')
+  .clearCookie('user_id')
   .redirect("/urls");
 })
 app.get("/register", (req, res) => {
@@ -99,10 +110,13 @@ app.post("/register", (req, res) => {
   const password = req.body.password;
   const id = generateRandomString(5);
 
-  console.log(req.body)
   if (!email || !password) {
     return res.status(400).send("Please provide a username and a password")
   }
+  if (userFinder(email)) {
+    return res.status(400).send("This email is already registered")
+  }
+
   const newUser = {
     id,
     email,
