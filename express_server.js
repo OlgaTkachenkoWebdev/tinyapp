@@ -98,10 +98,17 @@ app.get("/urls/:id", (req, res) => {
     longURL: urlDatabase[req.params.id],
     user: users[req.cookies["user_id"]]
   };
+  if (!Object.keys(urlDatabase).includes(templateVars["id"])) {
+    res.send("URL is not found")
+  }
   res.render("urls_show", templateVars);
 });
 app.get("/u/:id", (req, res) => {
   const longURL = urlDatabase[req.params.id];
+  const id = req.params.id;
+  if (!Object.keys(urlDatabase).includes(id)) {
+    res.send("URL is not found")
+  }
   res.redirect(longURL);
 });
 app.post("/login", (req, res) => {
