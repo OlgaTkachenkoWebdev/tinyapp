@@ -12,6 +12,19 @@ let urlDatabase = {
   "9sm5xK": "http://www.google.com",
 };
 
+const users = {
+  userRandomID: {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "123",
+  },
+  user2RandomID: {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "456",
+  },
+};
+
 function generateRandomString(length) {
   let shortURL = '';
   let range = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -71,12 +84,35 @@ app.get("/u/:id", (req, res) => {
 app.post("/login", (req, res) => {
   res
   .cookie('username', req.body.username)
-  .redirect("/urls")
+  .redirect("/urls");
 });
 app.post("/logout", (req, res) => {
   res
   .clearCookie('username')
-  .redirect("/urls")
+  .redirect("/urls");
+})
+app.get("/register", (req, res) => {
+  res.render("register");
+})
+app.post("/register", (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  const id = generateRandomString(5);
+
+  console.log(req.body)
+  if (!email || !password) {
+    return res.status(400).send("Please provide a username and a password")
+  }
+  const newUser = {
+    id,
+    email,
+    password
+  }
+  users[id] = newUser;
+  
+  console.log(newUser)
+  res.cookie("user_id", id)
+  res.redirect("/urls")
 })
 
 app.listen(PORT, () => {
