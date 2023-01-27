@@ -7,11 +7,6 @@ app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// let urlDatabase = {
-//   "b2xVn2": "http://www.lighthouselabs.ca",
-//   "9sm5xK": "http://www.google.com",
-// };
-
 let urlDatabase = {
   b6UTxQ/*url ID*/: {
     longURL: "https://www.tsn.ca",
@@ -44,10 +39,10 @@ function generateRandomString(length) {
   }
   return shortURL;
 }
-
+//returns an object with user's information
 function userFinder(newEmail) {
   let foundUser = null;
-  for(let userId in users) {
+  for (let userId in users) {
     const user = users[userId];
     if (user['email'] === newEmail) {
       foundUser = user;
@@ -67,6 +62,25 @@ function urlsForUser(userId) {
   }
   return urlData;
 }
+// checks if url exists, if user is logged in or if url belongs to user
+function checkingAccess(req, res) {
+  const id = req.params.id;
+  if (!Object.keys(urlDatabase).includes(id)) {
+    res.send("URL is not found");
+    return false;
+  }
+  const userID = req.cookies["user_id"];
+  if (!userID) {
+    res.send("Please log in");
+    return false;
+  }
+  const usersUrl = urlDatabase[id];
+  if (usersUrl["userID"] !== userID) {
+    res.send("You don't have access")
+    return false;
+  }
+  return true;
+}
 
 
 app.get("/", (req, res) => {
@@ -83,11 +97,9 @@ app.post("/urls", (req, res) => {
     longURL,
     userID
   }
-  console.log("newURL", newURL);
   if (user) {
     urlDatabase[id] = newURL;
     res.redirect(`/urls/${id}`)
-    console.log("new Database", urlDatabase)
   } else {
     res.send("Please log in or register");
   };
@@ -128,33 +140,37 @@ app.get("/urls/new", (req, res) => {
 
 app.post("/urls/:id/delete", (req, res) => {
   const id = req.params.id;
-  delete urlDatabase[id];
-  res.redirect("/urls");
+  if (checkingAccess(req, res)) {
+    delete urlDatabase[id];
+    res.redirect("/urls");
+  }
 });
 
 app.get("/urls/:id", (req, res) => {
-  const userID = req.cookies["user_id"];
   const id = req.params.id;
-  if (!Object.keys(urlDatabase).includes(id)) {
-     return res.send("URL is not found")
-  }
-  const longURL = urlDatabase[id]["longURL"]
-  const templateVars = {
-    id,
-    longURL,
-    user: users[userID]
-  };
+  const userID = req.cookies["user_id"];
+  if (checkingAccess(req, res)) {
+    const longURL = url["longURL"]
+
+    const templateVars = {
+      id,
+      longURL,
+      user: users[userID]
+    };
 
     res.render("urls_show", templateVars);
+  }
 });
 
 
 app.post("/urls/:id", (req, res) => {
   const id = req.params.id;
-  const newLongURL = req.body.newLongURL;
-  const urlObject = urlDatabase[id];
-  urlObject["longURL"] = newLongURL;
-  res.redirect("/urls");
+  if (checkingAccess(req, res)) {
+    const newLongURL = req.body.newLongURL;
+    const urlObject = urlDatabase[id];
+    urlObject["longURL"] = newLongURL;
+    res.redirect("/urls");
+  }
 });
 
 
