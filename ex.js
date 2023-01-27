@@ -1,23 +1,46 @@
-const users = {
-  userRandomID: {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "123",
+// const users = {
+//   userRandomID: {
+//     id: "userRandomID",
+//     email: "user@example.com",
+//     password: "123",
+//   },
+//   user2RandomID: {
+//     id: "user2RandomID",
+//     email: "user2@example.com",
+//     password: "456",
+//   },
+// };
+// function userFinder(newEmail) {
+//   let foundUser = null;
+//   for(let userId in users) {
+//     const user = users[userId];
+//     if (user['email'] === newEmail) {
+//       foundUser = user;
+//     }
+//   }
+//   return foundUser;
+// }
+// console.log(userFinder('user@example.com'))
+
+let urlDatabase = {
+  b6UTxQ/*url ID*/: {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW",
   },
-  user2RandomID: {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "456",
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW",
   },
 };
-function userFinder(newEmail) {
-  let foundUser = null;
-  for(let userId in users) {
-    const user = users[userId];
-    if (user['email'] === newEmail) {
-      foundUser = user;
+
+function urlsForUser(userId) {
+  let urlData = {};
+  for (let urlId in urlDatabase) {
+    const info = urlDatabase[urlId];
+    if (info['userID'] === userId) {
+      urlData[urlId] = info["longURL"];
     }
   }
-  return foundUser;
+  return urlData;
 }
-console.log(userFinder('user@example.com'))
+console.log(urlsForUser("aJ48lW"))

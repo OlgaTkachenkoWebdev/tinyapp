@@ -56,12 +56,13 @@ function userFinder(newEmail) {
   return foundUser;
 }
 
-function urlFinder(userId) {
-  let urlData = null;
+//returns object with shortURL as a key and longURL as a value
+function urlsForUser(userId) {
+  let urlData = {};
   for (let urlId in urlDatabase) {
     const info = urlDatabase[urlId];
     if (info['userID'] === userId) {
-      urlData = info;
+      urlData[urlId] = info["longURL"];
     }
   }
   return urlData;
@@ -73,33 +74,42 @@ app.get("/", (req, res) => {
 });
 
 
-app.get("/urls", (req, res) => {
-
-  const templateVars = {
-    urls: urlDatabase,
-    user: users[req.cookies["user_id"]]
-  };
-
-  res.render("urls_index", templateVars);
-});
-
-
 app.post("/urls", (req, res) => {
   const longURL = req.body.longURL;
   const id = generateRandomString(6);
   const user = users[req.cookies["user_id"]]
-  const userId = user["id"]
+  const userID = user["id"]
   const newURL = {
     longURL,
-    userId
+    userID
   }
-
+  console.log("newURL", newURL);
   if (user) {
     urlDatabase[id] = newURL;
     res.redirect(`/urls/${id}`)
+    console.log("new Database", urlDatabase)
   } else {
     res.send("Please log in or register");
   };
+});
+
+
+app.get("/urls", (req, res) => {
+  const user = users[req.cookies["user_id"]];
+
+  if (!user) {
+    return res.send("Please log in");
+  }
+
+  const userId = req.cookies["user_id"];
+  const usersUrls = urlsForUser(userId);
+
+  const templateVars = {
+    urls: usersUrls,
+    user: users[req.cookies["user_id"]]
+  };
+
+  res.render("urls_index", templateVars);
 });
 
 
@@ -163,10 +173,7 @@ app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   const user = userFinder(email);
-  console.log(email)
-  console.log(password)
-  console.log(user)
-  console.log(users)
+
   if (!user) {
     return res.status(403).send("Email is not found")
   } else if (user["password"] !== password) {
