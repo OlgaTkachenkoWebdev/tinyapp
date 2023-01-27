@@ -45,16 +45,16 @@ function generateRandomString(length) {
   return shortURL;
 }
 //returns an object with user's information
-function userFinder(newEmail) {
+const getUserByEmail = function (email, database) {
   let foundUser = null;
-  for (let userId in users) {
-    const user = users[userId];
-    if (user['email'] === newEmail) {
+  for (const userID in database) {
+    const user = database[userID];
+    if (user["email"] === email) {
       foundUser = user;
     }
   }
   return foundUser;
-}
+};
 
 //returns object with shortURL as a key and longURL as a value
 function urlsForUser(userId) {
@@ -193,7 +193,7 @@ app.get("/u/:id", (req, res) => {
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  const user = userFinder(email);
+  const user = getUserByEmail(email, users);
 
   if (!user) {
     return res.status(403).send("Email is not found")
@@ -238,7 +238,7 @@ app.post("/register", (req, res) => {
   const password = req.body.password;
   const hashedPassword = bcrypt.hashSync(password, 10);
   const id = generateRandomString(5);
-  const user = userFinder(email);
+  const user = getUserByEmail(email, users);
 
   if (!email || !password) {
     return res.status(400).send("Please provide a email and a password");
