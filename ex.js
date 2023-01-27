@@ -16,7 +16,6 @@ function userFinder(newEmail) {
     const user = users[userId];
     if (user['email'] === newEmail) {
       foundUser = user;
-      console.log(foundUser)
     }
   }
   return foundUser;
